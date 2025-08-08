@@ -1,31 +1,22 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
 const scoreEl = document.getElementById('score');
-const turboEl = document.getElementById('turbo');
 const gameOverEl = document.getElementById('gameOver');
 const finalScoreEl = document.getElementById('finalScore');
 const restartBtn = document.getElementById('restartBtn');
+const turboModeEl = document.getElementById('turboMode');
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
-
 const backgroundImg = new Image();
-backgroundImg.src = 'https://img.craftpix.net/2023/05/Free-RPG-Battleground-Asset-Pack4-720x480.webp';
-let backgroundX = 0;
-let backgroundSpeed = 2;
-
-function drawBackground() {
-  backgroundX -= backgroundSpeed;
-  if (backgroundX <= -WIDTH) backgroundX = 0;
-  ctx.drawImage(backgroundImg, backgroundX, 0, WIDTH, HEIGHT);
-  ctx.drawImage(backgroundImg, backgroundX + WIDTH, 0, WIDTH, HEIGHT);
-}
-
+backgroundImg.src = 'imagens/Free-RPG-Battleground-Asset-Pack4-720x480.webp';
 
 const playerImg = new Image();
-playerImg.src = 'capivara.png';
+playerImg.src = 'imagens/capivara(1).png';
+
+const obstacleImg = new Image();
+obstacleImg.src = 'imagens/pngtree-traffic-cone-in-3d-flat-style-with-orange-white-color-png-image_6471441.png';
 
 const player = {
   x: 50,
@@ -46,7 +37,6 @@ let frameCount = 0;
 let score = 0;
 let gameRunning = true;
 
-
 window.addEventListener('keydown', e => {
   if ((e.code === 'Space' || e.code === 'ArrowUp') && !player.isJumping && gameRunning) {
     player.dy = player.jumpForce;
@@ -62,16 +52,15 @@ function resetGame() {
   obstacles = [];
   obstacleSpeed = 6;
   obstacleFrequency = 90;
-  backgroundSpeed = 2;
-  frameCount = 0;
   score = 0;
-  gameRunning = true;
+  frameCount = 0;
   player.y = HEIGHT - 60;
   player.dy = 0;
   player.isJumping = false;
-  scoreEl.textContent = 'Pontuação: 0';
+  gameRunning = true;
   gameOverEl.style.display = 'none';
-  turboEl.style.display = 'none';
+  turboModeEl.style.display = 'none';
+  scoreEl.textContent = `Pontuação: 0`;
   loop();
 }
 
@@ -79,10 +68,9 @@ function createObstacle() {
   const height = 30 + Math.random() * 40;
   const obstacle = {
     x: WIDTH,
-    y: HEIGHT - height - 20,
+    y: HEIGHT - height,
     width: 20 + Math.random() * 20,
-    height: height,
-    color: '#f00'
+    height: height
   };
   obstacles.push(obstacle);
 }
@@ -90,7 +78,6 @@ function createObstacle() {
 function updatePlayer() {
   player.dy += player.gravity;
   player.y += player.dy;
-
   if (player.y + player.height >= HEIGHT - 20) {
     player.y = HEIGHT - 20 - player.height;
     player.dy = 0;
@@ -105,17 +92,14 @@ function updateObstacles() {
       obstacles.splice(i, 1);
       score++;
       scoreEl.textContent = `Pontuação: ${score}`;
-
-      if (score % 5 === 0 && score < 50) {
+      if (score % 5 === 0) {
         obstacleSpeed += 0.5;
         if (obstacleFrequency > 40) obstacleFrequency -= 2;
       }
-
-      // Ativa modo turbo a partir de 50 pontos
       if (score >= 50) {
-        obstacleSpeed = 10;
-        backgroundSpeed = 4;
-        turboEl.style.display = 'block';
+        turboModeEl.style.display = 'block';
+        obstacleSpeed = 12;
+        obstacleFrequency = 40;
       }
     }
   }
@@ -134,8 +118,13 @@ function checkCollisions() {
       gameRunning = false;
       gameOverEl.style.display = 'block';
       finalScoreEl.textContent = `Sua pontuação: ${score}`;
+      turboModeEl.style.display = 'none';
     }
   }
+}
+
+function drawBackground() {
+  ctx.drawImage(backgroundImg, 0, 0, WIDTH, HEIGHT);
 }
 
 function drawPlayer() {
@@ -144,13 +133,12 @@ function drawPlayer() {
 
 function drawObstacles() {
   obstacles.forEach(obs => {
-    ctx.fillStyle = obs.color;
-    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+    ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
   });
 }
 
 function drawGround() {
-  ctx.fillStyle = '#444';
+  ctx.fillStyle = '#555';
   ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
 }
 
@@ -160,7 +148,6 @@ function clear() {
 
 function loop() {
   if (!gameRunning) return;
-
   clear();
   drawBackground();
   updatePlayer();
@@ -169,23 +156,12 @@ function loop() {
   drawGround();
   drawPlayer();
   drawObstacles();
-
   frameCount++;
   if (frameCount % obstacleFrequency === 0) {
     createObstacle();
   }
-
   requestAnimationFrame(loop);
 }
 
+resetGame();
 
-let assetsLoaded = 0;
-function checkAssetsLoaded() {
-  assetsLoaded++;
-  if (assetsLoaded === 2) {
-    resetGame();
-  }
-}
-
-playerImg.onload = checkAssetsLoaded;
-backgroundImg.onload = checkAssetsLoaded;
