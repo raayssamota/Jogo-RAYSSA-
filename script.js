@@ -1,167 +1,124 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
-const gameOverEl = document.getElementById('gameOver');
-const finalScoreEl = document.getElementById('finalScore');
-const restartBtn = document.getElementById('restartBtn');
-const turboModeEl = document.getElementById('turboMode');
+const images = [
+  "https://thumbs.dreamstime.com/b/design-animado-de-jogos-astronaut-pixel-art-bits-e-%C3%ADcone-do-vetor-arte-astronauta-isolado-302367159.jpg",
+  "https://img.freepik.com/premium-vector/pixel-art-illustration-rocket-pixelated-rocket-rocket-space-icon-pixelated-pixel-art-game_1038602-485.jpg",
+  "https://thumbs.dreamstime.com/b/pixel-art-meteor-illustration-vector-game-design-pixelated-space-icon-website-video-old-school-retro-327010911.jpg",
+  "https://www.shutterstock.com/image-vector/pixel-art-green-gray-cartoon-600nw-2131390057.jpg",
+  "https://static.vecteezy.com/system/resources/thumbnails/027/517/526/small_2x/pixel-art-alien-ufo-character-png.png",
+  "https://static.vecteezy.com/system/resources/thumbnails/048/106/126/small_2x/planet-saturn-pixel-art-png.png",
+  "https://thumbs.dreamstime.com/b/vetor-de-ilustra%C3%A7%C3%A3o-da-lua-pixel-art-para-o-jogo-arte-pixelizada-brilhante-pixelada-em-e-%C3%ADcone-site-v%C3%ADdeo-retro-escolar-antigo-324991619.jpg",
+  "https://static.vecteezy.com/ti/vetor-gratis/p1/10966336-icone-de-pixel-do-sol-gratis-vetor.jpg"
+];
 
-const WIDTH = canvas.width;
-const HEIGHT = canvas.height;
+const startScreen = document.getElementById('start-screen');
+const startButton = document.getElementById('start-button');
+const gameScreen = document.getElementById('game-screen');
+const gameBoard = document.getElementById('game-board');
+const statusDisplay = document.getElementById('status');
+const restartButton = document.getElementById('restart-button');
 
-const backgroundImg = new Image();
-backgroundImg.src = 'imagens/Free-RPG-Battleground-Asset-Pack4-720x480.webp';
+let flippedCards = [];
+let matchedPairs = 0;
+let lockBoard = false;
 
-const playerImg = new Image();
-playerImg.src = 'imagens/capivara(1).png';
+// Embaralha o array (Fisher-Yates)
+function shuffle(array) {
+  let currentIndex = array.length, randomIndex;
 
-const obstacleImg = new Image();
-obstacleImg.src = 'imagens/pngtree-traffic-cone-in-3d-flat-style-with-orange-white-color-png-image_6471441.png';
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
 
-const player = {
-  x: 50,
-  y: HEIGHT - 60,
-  width: 40,
-  height: 40,
-  dy: 0,
-  gravity: 0.8,
-  jumpForce: -15,
-  isJumping: false
-};
-
-let obstacles = [];
-let obstacleSpeed = 6;
-let obstacleFrequency = 90;
-let frameCount = 0;
-
-let score = 0;
-let gameRunning = true;
-
-window.addEventListener('keydown', e => {
-  if ((e.code === 'Space' || e.code === 'ArrowUp') && !player.isJumping && gameRunning) {
-    player.dy = player.jumpForce;
-    player.isJumping = true;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
   }
-});
-
-restartBtn.addEventListener('click', () => {
-  resetGame();
-});
-
-function resetGame() {
-  obstacles = [];
-  obstacleSpeed = 6;
-  obstacleFrequency = 90;
-  score = 0;
-  frameCount = 0;
-  player.y = HEIGHT - 60;
-  player.dy = 0;
-  player.isJumping = false;
-  gameRunning = true;
-  gameOverEl.style.display = 'none';
-  turboModeEl.style.display = 'none';
-  scoreEl.textContent = `Pontuação: 0`;
-  loop();
+  return array;
 }
 
-function createObstacle() {
-  const height = 30 + Math.random() * 40;
-  const obstacle = {
-    x: WIDTH,
-    y: HEIGHT - height,
-    width: 20 + Math.random() * 20,
-    height: height
-  };
-  obstacles.push(obstacle);
-}
+function createCards() {
+  const gameImages = shuffle([...images, ...images]); // duplica e embaralha
 
-function updatePlayer() {
-  player.dy += player.gravity;
-  player.y += player.dy;
-  if (player.y + player.height >= HEIGHT - 20) {
-    player.y = HEIGHT - 20 - player.height;
-    player.dy = 0;
-    player.isJumping = false;
-  }
-}
+  gameBoard.innerHTML = '';
+  matchedPairs = 0;
+  statusDisplay.textContent = 'Encontre os pares!';
+  flippedCards = [];
+  lockBoard = false;
 
-function updateObstacles() {
-  for (let i = obstacles.length - 1; i >= 0; i--) {
-    obstacles[i].x -= obstacleSpeed;
-    if (obstacles[i].x + obstacles[i].width < 0) {
-      obstacles.splice(i, 1);
-      score++;
-      scoreEl.textContent = `Pontuação: ${score}`;
-      if (score % 5 === 0) {
-        obstacleSpeed += 0.5;
-        if (obstacleFrequency > 40) obstacleFrequency -= 2;
-      }
-      if (score >= 50) {
-        turboModeEl.style.display = 'block';
-        obstacleSpeed = 12;
-        obstacleFrequency = 40;
-      }
-    }
-  }
-}
+  gameImages.forEach(imgSrc => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.dataset.image = imgSrc;
 
-function detectCollision(rect1, rect2) {
-  return rect1.x < rect2.x + rect2.width &&
-         rect1.x + rect1.width > rect2.x &&
-         rect1.y < rect2.y + rect2.height &&
-         rect1.y + rect1.height > rect2.y;
-}
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front"></div>
+        <div class="card-back" style="background-image: url('${imgSrc}');"></div>
+      </div>
+    `;
 
-function checkCollisions() {
-  for (const obs of obstacles) {
-    if (detectCollision(player, obs)) {
-      gameRunning = false;
-      gameOverEl.style.display = 'block';
-      finalScoreEl.textContent = `Sua pontuação: ${score}`;
-      turboModeEl.style.display = 'none';
-    }
-  }
-}
-
-function drawBackground() {
-  ctx.drawImage(backgroundImg, 0, 0, WIDTH, HEIGHT);
-}
-
-function drawPlayer() {
-  ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-}
-
-function drawObstacles() {
-  obstacles.forEach(obs => {
-    ctx.drawImage(obstacleImg, obs.x, obs.y, obs.width, obs.height);
+    card.addEventListener('click', () => flipCard(card));
+    gameBoard.appendChild(card);
   });
 }
 
-function drawGround() {
-  ctx.fillStyle = '#555';
-  ctx.fillRect(0, HEIGHT - 20, WIDTH, 20);
-}
+function flipCard(card) {
+  if (lockBoard) return;
+  if (flippedCards.includes(card)) return;
+  if (card.classList.contains('matched')) return;
 
-function clear() {
-  ctx.clearRect(0, 0, WIDTH, HEIGHT);
-}
+  card.classList.add('flipped');
+  flippedCards.push(card);
 
-function loop() {
-  if (!gameRunning) return;
-  clear();
-  drawBackground();
-  updatePlayer();
-  updateObstacles();
-  checkCollisions();
-  drawGround();
-  drawPlayer();
-  drawObstacles();
-  frameCount++;
-  if (frameCount % obstacleFrequency === 0) {
-    createObstacle();
+  if (flippedCards.length === 2) {
+    checkForMatch();
   }
-  requestAnimationFrame(loop);
 }
 
-resetGame();
+function checkForMatch() {
+  lockBoard = true;
+
+  const [card1, card2] = flippedCards;
+  const isMatch = card1.dataset.image === card2.dataset.image;
+
+  if (isMatch) {
+    card1.classList.add('matched');
+    card2.classList.add('matched');
+    matchedPairs++;
+    statusDisplay.textContent = `Pares encontrados: ${matchedPairs} de ${images.length}`;
+
+    resetTurn();
+
+    if (matchedPairs === images.length) {
+      statusDisplay.textContent = 'Parabéns! Você completou a Memória Galáctica! 🚀';
+    }
+  } else {
+    setTimeout(() => {
+      card1.classList.remove('flipped');
+      card2.classList.remove('flipped');
+      resetTurn();
+    }, 1000);
+  }
+}
+
+function resetTurn() {
+  flippedCards = [];
+  lockBoard = false;
+}
+
+function startGame() {
+  startScreen.style.display = 'none';
+  gameScreen.style.display = 'block';
+  createCards();
+}
+
+function restartGame() {
+  createCards();
+  statusDisplay.textContent = 'Encontre os pares!';
+}
+
+startButton.addEventListener('click', startGame);
+restartButton.addEventListener('click', restartGame);
+
+
+
+
+
 
