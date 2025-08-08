@@ -3,53 +3,42 @@
 }
 body {
   margin: 0;
-  background: #000;
+  background: #222;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  overflow: hidden;
   font-family: Arial, sans-serif;
+  color: white;
+  user-select: none;
+  position: relative;
 }
 #gameCanvas {
+  background: #444;
   border: 3px solid #fff;
   display: block;
-  background-color: #000;
 }
 #score {
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  color: white;
   font-size: 24px;
   font-weight: bold;
-  z-index: 2;
-}
-#turbo {
-  position: absolute;
-  top: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 32px;
-  color: red;
-  font-weight: bold;
-  display: none;
-  z-index: 2;
-  text-shadow: 2px 2px black;
+  z-index: 10;
 }
 #gameOver {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(0,0,0,0.8);
-  padding: 30px;
+  font-size: 36px;
+  background: rgba(0,0,0,0.7);
+  padding: 20px 40px;
   border-radius: 10px;
-  color: white;
-  text-align: center;
   display: none;
-  z-index: 2;
+  text-align: center;
+  z-index: 20;
 }
 #restartBtn {
   margin-top: 15px;
@@ -60,8 +49,20 @@ body {
   border-radius: 5px;
   background-color: #06c;
   color: white;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 #restartBtn:hover {
   background-color: #005bb5;
 }
+#turboMode {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: red;
+  display: none;
+  z-index: 15;
+  text-shadow: 0 0 5px #ff0000;
+}
+
