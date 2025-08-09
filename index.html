@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Memória Galáctica</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <section id="start-screen" class="screen active">
+    <h1 class="pixel-title">Memória Galáctica</h1>
+    <button id="btn-start">Iniciar Missão</button>
+    <button id="btn-functions">Ver Funções</button>
+  </section>
+
+  <section id="functions-screen" class="screen">
+    <h2 class="pixel-title small">Painel Espacial - Funções</h2>
+    <div class="functions-text">
+      <p><strong>Radar:</strong> Revela todas as cartas por 2 segundos (1 uso por partida).</p>
+      <p><strong>Pulso Magnético:</strong> Embaralha as cartas restantes quando restam 2 vidas.</p>
+      <p><strong>Escudo:</strong> Ativa com 1 vida e protege do próximo erro.</p>
+    </div>
+    <button id="btn-functions-back">Voltar</button>
+    <button id="btn-functions-start">Iniciar Missão</button>
+  </section>
+
+  <section id="game-screen" class="screen">
+    <header>
+      <h2>Memória Galáctica</h2>
+      <div id="vidas-container"></div>
+      <div id="alerta"></div>
+    </header>
+    <div id="game-board"></div>
+    <div class="game-buttons">
+      <button id="btn-radar" class="pixel-font">Radar</button>
+      <button id="btn-restart">Reiniciar</button>
+      <button id="btn-back-to-start">Voltar ao Início</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
