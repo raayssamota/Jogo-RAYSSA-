@@ -145,7 +145,7 @@ function resetarViradas() {
   lockBoard = false;
 }
 
-// Navegação entre telas
+
 btnStart.onclick = () => {
   startScreen.classList.remove('active');
   gameScreen.classList.add('active');
@@ -175,7 +175,7 @@ btnBackToStart.onclick = () => {
   startScreen.classList.add('active');
 };
 
-// Radar
+
 btnRadar.onclick = () => {
   if (radarUsado) {
     alerta.textContent = "Radar já foi usado!";
